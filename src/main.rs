@@ -13,12 +13,12 @@ fn main() {
     // the rest
     let mut player1: Vec<bool> = vec![false; 9];
     let mut player2: Vec<bool> = vec![false; 9];
-    let mut player1_turn = true;
+    let mut player_turn = 1; // player 1 / 2
     let mut winner = 0;
 
     let mut msg = String::new();
     while winner == 0 {
-        draw_game(&field_vec, &mut msg, true);
+        draw_game(&field_vec, &mut msg, true, player_turn);
 
         let mut player_input = String::new();
         io::stdin()
@@ -41,24 +41,25 @@ fn main() {
             msg = String::from("This field is already occupied. Choose another one.");
             continue;
         }
-        if player1_turn {
+        if player_turn == 1 {
             player1[player_move.square_val] = true;
             field_vec[*indices.get(player_move.square_val).unwrap()] = 'X';
             if tic_tac_toe(&player1) {
                 winner = 1;
             }
+            player_turn = 2;
         } else {
             player2[player_move.square_val] = true;
             field_vec[*indices.get(player_move.square_val).unwrap()] = 'O';
             if tic_tac_toe(&player2) {
                 winner = 2;
             }
+            player_turn = 1;
         }
-        player1_turn = !player1_turn;
 
     }
-    draw_game(&field_vec, &mut msg, false);
-    println!("\u{001b}[35mCongratulations, player {}. You win!\u{001b}[0m", winner);
+    draw_game(&field_vec, &mut msg, false, 0);
+    println!("\u{001b}[33mCongratulations, player {}. You win!\u{001b}[0m", winner);
 }
 
 // Reads a tic-tac-toe field template from a file and feeds each of its characters into the field_vec
@@ -87,11 +88,11 @@ fn create_field(filename: &str, indices: &mut Vec<usize>) -> Result<Vec<char>, i
 
 // Draws the field in its current state after clearing the screen, prints the prompt to enter
 // coordinates and prints the message possibly containing an error
-fn draw_game(field_vec: &Vec<char>, msg: &mut String, prompt_user: bool) {
+fn draw_game(field_vec: &Vec<char>, msg: &mut String, prompt_user: bool, current_player: i32) {
     let field_as_string: String = field_vec.iter().collect();
     println!("{esc}[2J{esc}[1;1H", esc = 27 as char);
     println!("{}", field_as_string);
-    if prompt_user { println!("{}\nEnter coordinate:", msg) }
+    if prompt_user { println!("\u{001b}[35m{}\u{001b}[0m\nEnter coordinate (Player {}):", msg, current_player) }
     msg.clear();
 }
 
